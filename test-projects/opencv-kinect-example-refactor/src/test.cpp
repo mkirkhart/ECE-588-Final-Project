@@ -66,7 +66,8 @@ int main(int argc, char **argv)
 				die = true;
 				break;
 
-			case 8:
+			case 'C':
+			case 'c':
 				{
 					std::ostringstream file;
 					file << filename << i_snap << suffix;
