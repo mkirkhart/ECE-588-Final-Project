@@ -18,14 +18,17 @@ int main(int argc, char **argv)
 	const std::string RGBCaptureWindowName("RGB");
 	const std::string DepthCaptureWindowName("Depth");
 
-	string filename("snapshot");
+	int DepthLowerRange = 25;
+	int DepthUpperRange = 80;
+
+	string RGBFilename("rgb-snapshot");
+	string DepthFilename("depth-snapshot");
 	string suffix(".png");
 	int i_snap(0),iter(0);
 
 	Mat depthMat(Size(640,480),CV_16UC1);
 	Mat depthf (Size(640,480),CV_8UC1);
 	Mat rgbMat(Size(640,480),CV_8UC3,Scalar(0));
-	Mat ownMat(Size(640,480),CV_8UC3,Scalar(0));
 
 	// The next two lines must be changed as Freenect::Freenect
 	// isn't a template but the method createDevice:
@@ -45,7 +48,6 @@ int main(int argc, char **argv)
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 #endif	//_UBUNTU_12_04
 
-
 	namedWindow(RGBCaptureWindowName, CV_WINDOW_AUTOSIZE);
 	namedWindow(DepthCaptureWindowName, CV_WINDOW_AUTOSIZE);
 	device.startVideo();
@@ -57,6 +59,9 @@ int main(int argc, char **argv)
 		device.getDepth(depthMat);
 		cv::imshow(RGBCaptureWindowName, rgbMat);
 		depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
+		// show objects within given range as white, everything else as black
+//		cv::inRange(depthf, DepthLowerRange, DepthUpperRange, depthf);
+
 		cv::imshow(DepthCaptureWindowName, depthf);
 		char k = cvWaitKey(5);
 
@@ -69,9 +74,12 @@ int main(int argc, char **argv)
 			case 'C':
 			case 'c':
 				{
-					std::ostringstream file;
-					file << filename << i_snap << suffix;
-					cv::imwrite(file.str(), rgbMat);
+					std::ostringstream rgbfile, depthfile;
+					rgbfile << RGBFilename << i_snap << suffix;
+					depthfile << DepthFilename << i_snap << suffix;
+					cv::imwrite(rgbfile.str(), rgbMat);
+					cv::imwrite(depthfile.str(), depthf);
+
 					i_snap++;
 				}
 				break;
