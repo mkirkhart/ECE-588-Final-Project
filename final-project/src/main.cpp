@@ -146,7 +146,7 @@ int main(int argc, char** argv)
 //		boxFilter(mid2, mid2_2, -1, Size(5,5), Point(-1, -1), false, BORDER_DEFAULT);
 
 		//AND mid1 and mid2 into output image
-		bitwise_and(mid1, mid2, output);
+		bitwise_and(mid1, mid2_2, output);
 
 		// display input image
 		cv::imshow(InputImageWindow, input);
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 			// save output image
 			cv::imwrite("input.jpg", input);
 			cv::imwrite("mid1.jpg", mid1);
-			cv::imwrite("mid2.jpg", mid2);
+			cv::imwrite("mid2.jpg", mid2_2);
 			cv::imwrite("output.jpg", output);
 
 			// Wait until user exit program by pressing a key
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
 					// save output image
 					cv::imwrite("input.jpg", input);
 					cv::imwrite("mid1.jpg", mid1);
-					cv::imwrite("mid2.jpg", mid2);
+					cv::imwrite("mid2.jpg", mid2_2);
 					cv::imwrite("output.jpg", output);
 					break;
 
