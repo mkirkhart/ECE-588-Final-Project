@@ -56,8 +56,8 @@ static const char HSVTrackbarMaxSaturationName[] = "Max S";
 static const char HSVTrackbarMinValueName[] = "Min V";
 static const char HSVTrackbarMaxValueName[] = "Max V";
 
-static int MinHue = 0;
-static int MaxHue = 40;
+static int MinHue = 80;
+static int MaxHue = 140;
 static const int HueLowLimit = 0;
 static const int HueHighLimit = 180;
 
@@ -76,7 +76,12 @@ static const int ValueHighLimit = 255;
 
 void HSVHandDetection(cv::Mat &Image)
 {
-	cv::cvtColor(Image, Image, CV_BGR2HSV);
+	// NOTE: while the input image is actually BGR, we specify
+	// it as RGB when converting to HSV, as this automatically
+	// "rotates" the hue by 180 degrees (90 in OpenCV), putting
+	// red at 90 instead of 0.  This allows us to set low limits
+	// to negative hues (reds with small amounts of blue)
+	cv::cvtColor(Image, Image, CV_RGB2HSV);
 
 	const cv::Scalar HSVMin(MinHue, MinSaturation, MinValue);
 	const cv::Scalar HSVMax(MaxHue, MaxSaturation, MaxValue);
