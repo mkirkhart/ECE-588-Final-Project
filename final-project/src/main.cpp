@@ -86,6 +86,8 @@ int main(int argc, char** argv)
 	// Create window for output image
 	cv::namedWindow(OutputImageWindow, CV_WINDOW_AUTOSIZE);
 
+	HSVHandDetectionCreateTrackbarWindow();
+
 	while(Run)
 	{
 		if(ReadFromFile)
@@ -143,7 +145,6 @@ int main(int argc, char** argv)
 		// and thicken the line using a box filter
 		cv::Mat mid2_2;
 		boxFilter(mid2, mid2_2, -1, Size(3,3), Point(-1, -1), false, BORDER_DEFAULT);
-//		boxFilter(mid2, mid2_2, -1, Size(5,5), Point(-1, -1), false, BORDER_DEFAULT);
 
 		//AND mid1 and mid2 into output image
 		bitwise_and(mid1, mid2_2, output);

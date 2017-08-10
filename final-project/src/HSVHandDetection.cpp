@@ -36,20 +36,70 @@
 //#define _USE_ORIGINAL_HSV_LIMITS
 
 #ifdef _USE_ORIGINAL_HSV_LIMITS
-static const cv::Scalar HSVMin = cv::Scalar(0, 30, 80);
-static const cv::Scalar HSVMax = cv::Scalar(20, 150, 255);
+//static const cv::Scalar HSVMin = cv::Scalar(0, 30, 80);
+//static const cv::Scalar HSVMax = cv::Scalar(20, 150, 255);
 #else
 //static const cv::Scalar HSVMin = cv::Scalar(10, 30, 50);
 //static const cv::Scalar HSVMax = cv::Scalar(25, 200, 255);
-static const cv::Scalar HSVMin = cv::Scalar(0, 20, 20);
-static const cv::Scalar HSVMax = cv::Scalar(40, 255, 255);
+//static const cv::Scalar HSVMin = cv::Scalar(0, 20, 20);
+//static const cv::Scalar HSVMax = cv::Scalar(40, 255, 255);
 #endif	//_USE_ORIGINAL_HSV_LIMITS
+
+static const char HSVTrackbarWindowName[] = "HSV Detection Parameters";
+
+static const char HSVTrackbarMinHueName[] = "Min H";
+static const char HSVTrackbarMaxHueName[] = "Max H";
+
+static const char HSVTrackbarMinSaturationName[] = "Min S";
+static const char HSVTrackbarMaxSaturationName[] = "Max S";
+
+static const char HSVTrackbarMinValueName[] = "Min V";
+static const char HSVTrackbarMaxValueName[] = "Max V";
+
+static int MinHue = 0;
+static int MaxHue = 40;
+static const int HueLowLimit = 0;
+static const int HueHighLimit = 180;
+
+static int MinSaturation = 20;
+static int MaxSaturation = 255;
+
+static const int SaturationLowLimit = 0;
+static const int SaturationHighLimit = 255;
+
+static int MinValue = 20;
+static int MaxValue = 255;
+
+static const int ValueLowLimit = 0;
+static const int ValueHighLimit = 255;
 
 
 void HSVHandDetection(cv::Mat &Image)
 {
 	cv::cvtColor(Image, Image, CV_BGR2HSV);
+
+	const cv::Scalar HSVMin(MinHue, MinSaturation, MinValue);
+	const cv::Scalar HSVMax(MaxHue, MaxSaturation, MaxValue);
+
 	cv::inRange(Image, HSVMin, HSVMax, Image);
 }
 
+
+void HSVHandDetectionCreateTrackbarWindow(void)
+{
+	cv::namedWindow(HSVTrackbarWindowName, CV_WINDOW_AUTOSIZE);
+
+	cv::createTrackbar(HSVTrackbarMinHueName, HSVTrackbarWindowName, &MinHue, HueHighLimit, NULL, NULL);
+	cv::createTrackbar(HSVTrackbarMaxHueName, HSVTrackbarWindowName, &MaxHue, HueHighLimit, NULL, NULL);
+	cv::createTrackbar(HSVTrackbarMinSaturationName, HSVTrackbarWindowName, &MinSaturation, SaturationHighLimit, NULL, NULL);
+	cv::createTrackbar(HSVTrackbarMaxSaturationName, HSVTrackbarWindowName, &MaxSaturation, SaturationHighLimit, NULL, NULL);
+	cv::createTrackbar(HSVTrackbarMinValueName, HSVTrackbarWindowName, &MinValue, ValueHighLimit, NULL, NULL);
+	cv::createTrackbar(HSVTrackbarMaxValueName, HSVTrackbarWindowName, &MaxValue, ValueHighLimit, NULL, NULL);
+}
+
+
+void HSVHandDetectionDestroyTrackbarWindow(void)
+{
+	cv::destroyWindow(HSVTrackbarWindowName);
+}
 
