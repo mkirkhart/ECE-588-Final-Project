@@ -86,7 +86,8 @@ int main(int argc, char** argv)
 	// Create window for output image
 	cv::namedWindow(OutputImageWindow, CV_WINDOW_AUTOSIZE);
 
-	HSVHandDetectionCreateTrackbarWindow();
+//	HSVHandDetectionCreateTrackbarWindow();
+	EllipseHandDetectionCreateTrackbarWindow();
 
 	while(Run)
 	{
@@ -131,8 +132,8 @@ int main(int argc, char** argv)
 		input.copyTo(mid1);
 
 		// run hand detection on mid1 image
-		HSVHandDetection(mid1);
-//		EllipseHandDetection(mid1);
+//		HSVHandDetection(mid1);
+		EllipseHandDetection(mid1);
 
 		// run Canny on mid2 image
 		  //first convert to grayscale
