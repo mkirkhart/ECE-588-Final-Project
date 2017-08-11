@@ -32,7 +32,7 @@ static const int MaxScaledEllipseA = 200;
 static int ScaledEllipseB = 60;
 
 static const int MinScaledEllipseB = 1;
-static const int MaxScaledEllipseB = 300;
+static const int MaxScaledEllipseB = 400;
 
 static const double EllipseABScalingFactor = 0.001;
 
@@ -104,12 +104,12 @@ void EllipseHandDetection(cv::Mat &Image)
 }
 
 
-void EllipseHandDetectionCreateTrackbarWindow(void)
+void EllipseHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *))
 {
 	cv::namedWindow(EllipseTrackbarWindowName, CV_WINDOW_AUTOSIZE);
 
-	cv::createTrackbar(EllipseTrackbarEllipseAName, EllipseTrackbarWindowName, &ScaledEllipseA, MaxScaledEllipseA, NULL, NULL);
-	cv::createTrackbar(EllipseTrackbarEllipseBName, EllipseTrackbarWindowName, &ScaledEllipseB, MaxScaledEllipseB, NULL, NULL);
+	cv::createTrackbar(EllipseTrackbarEllipseAName, EllipseTrackbarWindowName, &ScaledEllipseA, MaxScaledEllipseA, pCallbackFunction, NULL);
+	cv::createTrackbar(EllipseTrackbarEllipseBName, EllipseTrackbarWindowName, &ScaledEllipseB, MaxScaledEllipseB, pCallbackFunction, NULL);
 
 	cv::setTrackbarMin(EllipseTrackbarEllipseAName, EllipseTrackbarWindowName, MinScaledEllipseA);
 	cv::setTrackbarMin(EllipseTrackbarEllipseBName, EllipseTrackbarWindowName, MinScaledEllipseB);

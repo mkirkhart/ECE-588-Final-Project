@@ -11,7 +11,7 @@
 #include <vector>
 
 void EllipseHandDetection(cv::Mat &Image);
-void EllipseHandDetectionCreateTrackbarWindow(void);
+void EllipseHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *));
 void EllipseHandDetectionDestroyTrackbarWindow(void);
 
 #endif	//_ELLIPSEHANDDETECTIONH_

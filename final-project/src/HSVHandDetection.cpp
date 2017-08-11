@@ -90,16 +90,16 @@ void HSVHandDetection(cv::Mat &Image)
 }
 
 
-void HSVHandDetectionCreateTrackbarWindow(void)
+void HSVHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *))
 {
 	cv::namedWindow(HSVTrackbarWindowName, CV_WINDOW_AUTOSIZE);
 
-	cv::createTrackbar(HSVTrackbarMinHueName, HSVTrackbarWindowName, &MinHue, HueHighLimit, NULL, NULL);
-	cv::createTrackbar(HSVTrackbarMaxHueName, HSVTrackbarWindowName, &MaxHue, HueHighLimit, NULL, NULL);
-	cv::createTrackbar(HSVTrackbarMinSaturationName, HSVTrackbarWindowName, &MinSaturation, SaturationHighLimit, NULL, NULL);
-	cv::createTrackbar(HSVTrackbarMaxSaturationName, HSVTrackbarWindowName, &MaxSaturation, SaturationHighLimit, NULL, NULL);
-	cv::createTrackbar(HSVTrackbarMinValueName, HSVTrackbarWindowName, &MinValue, ValueHighLimit, NULL, NULL);
-	cv::createTrackbar(HSVTrackbarMaxValueName, HSVTrackbarWindowName, &MaxValue, ValueHighLimit, NULL, NULL);
+	cv::createTrackbar(HSVTrackbarMinHueName, HSVTrackbarWindowName, &MinHue, HueHighLimit, pCallbackFunction, NULL);
+	cv::createTrackbar(HSVTrackbarMaxHueName, HSVTrackbarWindowName, &MaxHue, HueHighLimit, pCallbackFunction, NULL);
+	cv::createTrackbar(HSVTrackbarMinSaturationName, HSVTrackbarWindowName, &MinSaturation, SaturationHighLimit, pCallbackFunction, NULL);
+	cv::createTrackbar(HSVTrackbarMaxSaturationName, HSVTrackbarWindowName, &MaxSaturation, SaturationHighLimit, pCallbackFunction, NULL);
+	cv::createTrackbar(HSVTrackbarMinValueName, HSVTrackbarWindowName, &MinValue, ValueHighLimit, pCallbackFunction, NULL);
+	cv::createTrackbar(HSVTrackbarMaxValueName, HSVTrackbarWindowName, &MaxValue, ValueHighLimit, pCallbackFunction, NULL);
 }
 
 
