@@ -18,6 +18,8 @@
 #include <vector>
 
 void HSVHandDetection(cv::Mat &Image);
+void HSVHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *));
+void HSVHandDetectionDestroyTrackbarWindow(void);
 
 #endif	//_HSVHANDDETECTIONH_
 

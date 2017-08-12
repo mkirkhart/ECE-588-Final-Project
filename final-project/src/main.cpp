@@ -16,7 +16,21 @@
 #include "EllipseHandDetection.h"
 #include "HSVHandDetection.h"
 
-using namespace cv;
+
+typedef enum
+{
+	DETECTION_METHOD_HSV,
+	DETECTION_METHOD_ELLIPSE
+}	DetectionMethod_t;
+
+
+static bool TrackbarValueChanged = false;
+
+static void TrackbarValueChangeCallback(int Value, void *pParam)
+{
+	TrackbarValueChanged = true;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -24,9 +38,13 @@ int main(int argc, char** argv)
 	bool ReadFromFile = false;
 	bool Run = true;
 	std::string InputFileName;
+	DetectionMethod_t DetectionMethod = DETECTION_METHOD_HSV;
+//	DetectionMethod_t DetectionMethod = DETECTION_METHOD_ELLIPSE;
 
 	const char InputImageWindow[] = "Input Image";
-	const char middleWindow1[] = "HSV Results";
+	const char HSVDetectionWindow[] = "HSV Detect Results";
+	const char EllipseDetectionWindow[] = "Ellipse Detect Results";
+	const char *middleWindow1 = NULL;
 	const char middleWindow2[] = "Canny Results";
 	const char OutputImageWindow[] = "Hand Detection Results";
 	cv::Mat input;
@@ -81,10 +99,28 @@ int main(int argc, char** argv)
 	// Create window for input image
 	cv::namedWindow(InputImageWindow, CV_WINDOW_AUTOSIZE);
 	//Create windows for intermediary steps
+	if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+	{
+		middleWindow1 = EllipseDetectionWindow;
+	}
+	else
+	{
+		middleWindow1 = HSVDetectionWindow;
+	}
+
 	cv::namedWindow(middleWindow1, CV_WINDOW_AUTOSIZE);
 	cv::namedWindow(middleWindow2, CV_WINDOW_AUTOSIZE);
 	// Create window for output image
 	cv::namedWindow(OutputImageWindow, CV_WINDOW_AUTOSIZE);
+
+	if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+	{
+		EllipseHandDetectionCreateTrackbarWindow(TrackbarValueChangeCallback);
+	}
+	else
+	{
+		HSVHandDetectionCreateTrackbarWindow(TrackbarValueChangeCallback);
+	}
 
 	while(Run)
 	{
@@ -129,24 +165,29 @@ int main(int argc, char** argv)
 		input.copyTo(mid1);
 
 		// run hand detection on mid1 image
-		HSVHandDetection(mid1);
-//		EllipseHandDetection(mid1);
+		if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+		{
+			EllipseHandDetection(mid1);
+		}
+		else
+		{
+			HSVHandDetection(mid1);
+		}
 
 		// run Canny on mid2 image
 		  //first convert to grayscale
-		cvtColor( input, mid2gray, COLOR_BGR2GRAY );
+		cv::cvtColor( input, mid2gray, cv::COLOR_BGR2GRAY );
 		  //blur image
-		blur( mid2gray, mid2, Size(3,3) );
+		cv::blur( mid2gray, mid2, cv::Size(3,3) );
 		  //run canny
-		Canny( mid2, mid2, 10, 80, 3 );
+		cv::Canny( mid2, mid2, 10, 80, 3 );
 
 		// and thicken the line using a box filter
 		cv::Mat mid2_2;
-		boxFilter(mid2, mid2_2, -1, Size(3,3), Point(-1, -1), false, BORDER_DEFAULT);
-//		boxFilter(mid2, mid2_2, -1, Size(5,5), Point(-1, -1), false, BORDER_DEFAULT);
+		cv::boxFilter(mid2, mid2_2, -1, cv::Size(3,3), cv::Point(-1, -1), false, cv::BORDER_DEFAULT);
 
 		//AND mid1 and mid2 into output image
-		bitwise_and(mid1, mid2_2, output);
+		cv::bitwise_and(mid1, mid2_2, output);
 
 		// display input image
 		cv::imshow(InputImageWindow, input);
@@ -158,23 +199,8 @@ int main(int argc, char** argv)
 		// display output image
 		cv::imshow(OutputImageWindow, output);
 
-		if(ReadFromFile)
+		do
 		{
-			// save output image
-			cv::imwrite("input.jpg", input);
-			cv::imwrite("mid1.jpg", mid1);
-			cv::imwrite("mid2.jpg", mid2_2);
-			cv::imwrite("output.jpg", output);
-
-			// Wait until user exit program by pressing a key
-			cv::waitKey(0);
-
-			// we are done
-			Run = false;
-		}
-		else
-		{
-			// wait for keypress from user to either exit or adjust the ellipse parameters
 			char KeyPress = cv::waitKey(10);
 
 			switch(KeyPress)
@@ -196,6 +222,7 @@ int main(int argc, char** argv)
 					break;
 			}
 		}
+		while(ReadFromFile && Run && (!TrackbarValueChanged));
 	}
 
 	if(UseLiveVideo)

@@ -11,13 +11,30 @@
 #define _USE_ORIGINAL_ELLIPSE_AB_VALUES
 
 #if defined(_USE_ORIGINAL_ELLIPSE_AB_VALUES)
-static const double EllipseA = 0.02;
-static const double EllipseB = 0.06;
+//static const double EllipseA = 0.02;
+//static const double EllipseB = 0.06;
 #else
-static const double EllipseA = 0.14;
-static const double EllipseB = 0.24;
+//static const double EllipseA = 0.14;
+//static const double EllipseB = 0.24;
 #endif	//_USE_ORIGINAL_ELLIPSE_AB_VALUES
 
+
+static const char EllipseTrackbarWindowName[] = "Ellipse Detection Parameters";
+
+static const char EllipseTrackbarEllipseAName[] = "Ellipse A";
+static const char EllipseTrackbarEllipseBName[] = "Ellipse B";
+
+static int ScaledEllipseA = 20;
+
+static const int MinScaledEllipseA = 1;
+static const int MaxScaledEllipseA = 200;
+
+static int ScaledEllipseB = 60;
+
+static const int MinScaledEllipseB = 1;
+static const int MaxScaledEllipseB = 400;
+
+static const double EllipseABScalingFactor = 0.001;
 
 static bool IsInsideStandardEllipse(const cv::Vec3b &BGRPixel, const double EllipseA, const double EllipseB)
 {
@@ -56,6 +73,9 @@ static bool IsInsideStandardEllipse(const cv::Vec3b &BGRPixel, const double Elli
 
 void EllipseHandDetection(cv::Mat &Image)
 {
+	double EllipseA = ScaledEllipseA * EllipseABScalingFactor;
+	double EllipseB = ScaledEllipseB * EllipseABScalingFactor;
+
 	// test each pixel to see if its red, green values fall within the "standard ellipse"
 	// if so, make it white
 	// if not, set it to black
@@ -84,4 +104,20 @@ void EllipseHandDetection(cv::Mat &Image)
 }
 
 
+void EllipseHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *))
+{
+	cv::namedWindow(EllipseTrackbarWindowName, CV_WINDOW_AUTOSIZE);
+
+	cv::createTrackbar(EllipseTrackbarEllipseAName, EllipseTrackbarWindowName, &ScaledEllipseA, MaxScaledEllipseA, pCallbackFunction, NULL);
+	cv::createTrackbar(EllipseTrackbarEllipseBName, EllipseTrackbarWindowName, &ScaledEllipseB, MaxScaledEllipseB, pCallbackFunction, NULL);
+
+	cv::setTrackbarMin(EllipseTrackbarEllipseAName, EllipseTrackbarWindowName, MinScaledEllipseA);
+	cv::setTrackbarMin(EllipseTrackbarEllipseBName, EllipseTrackbarWindowName, MinScaledEllipseB);
+}
+
+
+void EllipseHandDetectionDestroyTrackbarWindow(void)
+{
+	cv::destroyWindow(EllipseTrackbarWindowName);
+}
 
