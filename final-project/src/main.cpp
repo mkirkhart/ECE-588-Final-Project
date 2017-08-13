@@ -24,6 +24,7 @@ typedef enum
 }	DetectionMethod_t;
 
 
+
 static bool TrackbarValueChanged = false;
 
 static void TrackbarValueChangeCallback(int Value, void *pParam)
@@ -39,7 +40,6 @@ int main(int argc, char** argv)
 	bool Run = true;
 	std::string InputFileName;
 	DetectionMethod_t DetectionMethod = DETECTION_METHOD_HSV;
-//	DetectionMethod_t DetectionMethod = DETECTION_METHOD_ELLIPSE;
 
 	const char InputImageWindow[] = "Input Image";
 	const char HSVDetectionWindow[] = "HSV Detect Results";
@@ -54,25 +54,51 @@ int main(int argc, char** argv)
 	cv::Mat output;
 	cv::VideoCapture video;
 
-	if(2 == argc)
+	const cv::String CommandLineParserKeys =
+		"{help h | |print this message}{detect d |h |detection method to use (--detect=h (HSV), --detect=e (ellipse))}{@input | |input image to use (leave blank for live video)}";
+
+	// use the OpenCV command line parser to parse the command line arguments
+	cv::CommandLineParser parser(argc, argv, CommandLineParserKeys);
+	parser.about("ECE-588 Summer 2017 Final Project for Aaron Romain and Michael Kirkhart - version 0.12");
+
+	if(!parser.check())
 	{
-		ReadFromFile = true;
-	}
-	else if(1 == argc)
-	{
-		UseLiveVideo = true;
-	}
-	else
-	{
-		printf("Invalid input arguments\n");
+		parser.printErrors();
 		return -1;
 	}
 
-	if(ReadFromFile)
+	if(parser.has("help"))
 	{
-		InputFileName = argv[1];
+		parser.printMessage();
+		return 0;
 	}
-	else if(UseLiveVideo)
+
+	if(parser.has("@input"))
+	{
+		InputFileName = parser.get<std::string>("@input");
+		ReadFromFile = true;
+	}
+	else
+	{
+		UseLiveVideo = true;
+	}
+
+	std::string detection_method = parser.get<std::string>("detect");
+	if("e" == detection_method)
+	{
+		DetectionMethod = DETECTION_METHOD_ELLIPSE;
+	}
+	else if("h" == detection_method)
+	{
+		DetectionMethod = DETECTION_METHOD_HSV;
+	}
+	else
+	{
+		printf("Invalid detection method specified\n");
+		return -1;
+	}
+
+	if(UseLiveVideo)
 	{
 		video.open(0);
 
@@ -89,11 +115,6 @@ int main(int argc, char** argv)
 
 			printf("Input video: (%d x %d)\n", VideoWidth, VideoHeight);
 		}
-	}
-	else
-	{
-		printf("Should not have gotten here!\n");
-		return -1;
 	}
 
 	// Create window for input image
