@@ -18,8 +18,10 @@ int main(int argc, char **argv)
 	const std::string RGBCaptureWindowName("RGB");
 	const std::string DepthCaptureWindowName("Depth");
 
+#ifdef _DEPTH_RANGE_MASKING
 	int DepthLowerRange = 25;
 	int DepthUpperRange = 80;
+#endif	//_DEPTH_RANGE_MASKING
 
 	string RGBFilename("rgb-snapshot");
 	string DepthFilename("depth-snapshot");
@@ -50,6 +52,13 @@ int main(int argc, char **argv)
 
 	namedWindow(RGBCaptureWindowName, CV_WINDOW_AUTOSIZE);
 	namedWindow(DepthCaptureWindowName, CV_WINDOW_AUTOSIZE);
+
+	// This might have been the functionality we have been looking for...
+	// This sets the depth image format to be in "registered" mode, which
+	// in libfreenect.h line 104 indicates "processed depth data in mm, aligned to 640x480 RGB"
+	// Not sure how well aligned it is, but it does appear to be much, much closer to being aligned
+	device.setDepthFormat(FREENECT_DEPTH_REGISTERED);
+
 	device.startVideo();
 	device.startDepth();
 
@@ -58,9 +67,14 @@ int main(int argc, char **argv)
 		device.getVideo(rgbMat);
 		device.getDepth(depthMat);
 		cv::imshow(RGBCaptureWindowName, rgbMat);
+
+		// This might need some adjustment after setting the depth format to FREENECT_DEPTH_REGISTERED
 		depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
+
+#ifdef _DEPTH_RANGE_MASKING
 		// show objects within given range as white, everything else as black
-//		cv::inRange(depthf, DepthLowerRange, DepthUpperRange, depthf);
+		cv::inRange(depthf, DepthLowerRange, DepthUpperRange, depthf);
+#endif	//_DEPTH_RANGE_MASKING
 
 		cv::imshow(DepthCaptureWindowName, depthf);
 		char k = cvWaitKey(5);
