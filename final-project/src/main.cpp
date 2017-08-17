@@ -15,7 +15,7 @@
 
 #include "EllipseHandDetection.h"
 #include "HSVHandDetection.h"
-
+#include "KinectInterface.h"
 
 typedef enum
 {
@@ -37,6 +37,8 @@ int main(int argc, char** argv)
 {
 	bool UseLiveVideo = false;
 	bool ReadFromFile = false;
+	bool UseKinect = false;
+
 	bool Run = true;
 	std::string InputFileName;
 	DetectionMethod_t DetectionMethod = DETECTION_METHOD_HSV;
@@ -44,6 +46,7 @@ int main(int argc, char** argv)
 	const char InputImageWindow[] = "Input Image";
 	const char HSVDetectionWindow[] = "HSV Detect Results";
 	const char EllipseDetectionWindow[] = "Ellipse Detect Results";
+	const char KinectDepthRangeDetectionWindow[] = "Kinect Depth Range Results";
 	const char *middleWindow1 = NULL;
 	const char middleWindow2[] = "Canny Results";
 	const char OutputImageWindow[] = "Hand Detection Results";
@@ -55,7 +58,7 @@ int main(int argc, char** argv)
 	cv::VideoCapture video;
 
 	const cv::String CommandLineParserKeys =
-		"{help h | |print this message}{detect d |h |detection method to use (--detect=h (HSV), --detect=e (ellipse))}{@input | |input image to use (leave blank for live video)}";
+		"{help h | |print this message}{detect d |h |detection method to use (--detect=h (HSV), --detect=e (ellipse))}{videosource v |c |video source to use (--videosource=c (webcam), --videosource=k (kinect)}{@input | |input image to use (leave blank for live video)}";
 
 	// use the OpenCV command line parser to parse the command line arguments
 	cv::CommandLineParser parser(argc, argv, CommandLineParserKeys);
@@ -78,9 +81,18 @@ int main(int argc, char** argv)
 		InputFileName = parser.get<std::string>("@input");
 		ReadFromFile = true;
 	}
-	else
+	else if(parser.has("videosource"))
 	{
-		UseLiveVideo = true;
+		std::string video_source = parser.get<std::string>("videosource");
+
+		if("k" == video_source)
+		{
+			UseKinect = true;
+		}
+		else
+		{
+			UseLiveVideo = true;
+		}
 	}
 
 	std::string detection_method = parser.get<std::string>("detect");
@@ -120,7 +132,11 @@ int main(int argc, char** argv)
 	// Create window for input image
 	cv::namedWindow(InputImageWindow, CV_WINDOW_AUTOSIZE);
 	//Create windows for intermediary steps
-	if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+	if(UseKinect)
+	{
+		middleWindow1 = KinectDepthRangeDetectionWindow;
+	}
+	else if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
 	{
 		middleWindow1 = EllipseDetectionWindow;
 	}
@@ -134,7 +150,11 @@ int main(int argc, char** argv)
 	// Create window for output image
 	cv::namedWindow(OutputImageWindow, CV_WINDOW_AUTOSIZE);
 
-	if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+	if(UseKinect)
+	{
+		KinectStart();
+	}
+	else if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
 	{
 		EllipseHandDetectionCreateTrackbarWindow(TrackbarValueChangeCallback);
 	}
@@ -161,6 +181,10 @@ int main(int argc, char** argv)
 				return -1;
 			}
 		}
+		else if(UseKinect)
+		{
+			KinectGetRGBandRangedDepthImages(input, mid1);
+		}
 		else if(UseLiveVideo)
 		{
 			// Get current image
@@ -181,18 +205,21 @@ int main(int argc, char** argv)
 			}
 		}
 
-		// create output image using input as a starting point
-		// (cannot use cv::Mat = operator - must use cv::Mat::copyTo() function to do deep copy
-		input.copyTo(mid1);
-
 		// run hand detection on mid1 image
-		if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+		if(!UseKinect)
 		{
-			EllipseHandDetection(mid1);
-		}
-		else
-		{
-			HSVHandDetection(mid1);
+			// create output image using input as a starting point
+			// (cannot use cv::Mat = operator - must use cv::Mat::copyTo() function to do deep copy
+			input.copyTo(mid1);
+
+			if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+			{
+				EllipseHandDetection(mid1);
+			}
+			else
+			{
+				HSVHandDetection(mid1);
+			}
 		}
 
 		// run Canny on mid2 image
@@ -246,7 +273,11 @@ int main(int argc, char** argv)
 		while(ReadFromFile && Run && (!TrackbarValueChanged));
 	}
 
-	if(UseLiveVideo)
+	if(UseKinect)
+	{
+		KinectStop();
+	}
+	else if(UseLiveVideo)
 	{
 		video.release();
 	}
