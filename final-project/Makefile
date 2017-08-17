@@ -14,11 +14,11 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 #CFLAGS = $(shell pkg-config --cflags opencv)
 # NOTE: This may need to be changed if opencv was built and installed from source
 # By default, the installer copies the headers to /usr/local/include/opencv2 (I believe)
-CFLAGS = -I/usr/include/opencv2
+CFLAGS = -I/usr/include/opencv2 -I/usr/include/libfreenect -I/usr/include/libusb-1.0
 # enable all standard warnings, build for debug (gdb3 level)
 CFLAGS += -Wall -ggdb3
 # NOTE: This may not work if opencv was built and installed from source
-LIBS = $(shell pkg-config --libs opencv)
+LIBS = $(shell pkg-config --libs opencv) -L/usr/lib -lfreenect -lpthread
 #LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -lopencv_flann  
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP $(CFLAGS)
