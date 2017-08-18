@@ -40,8 +40,27 @@ static void KinectDepthDetectDestroyTrackbarWindow(void)
 }
 
 
+static void KinectStopDevice(void)
+{
+	if(NULL != pFreenect)
+	{
+		pDevice->stopVideo();
+		pDevice->stopDepth();
+
+		delete pFreenect;
+		pFreenect = NULL;
+		pDevice = NULL;
+	}
+}
+
+
 void KinectStart(void)
 {
+	if(NULL != pFreenect)
+	{
+		KinectStopDevice();
+	}
+
 	// The next two lines must be changed as Freenect::Freenect
 	// isn't a template but the method createDevice:
 	// Freenect::Freenect<MyFreenectDevice> freenect;
@@ -84,16 +103,7 @@ void KinectGetRGBandRangedDepthImages(cv::Mat &RGB, cv::Mat &RangedDepth)
 
 void KinectStop(void)
 {
-	if(NULL != pFreenect)
-	{
-		pDevice->stopVideo();
-		pDevice->stopDepth();
-
-		delete pFreenect;
-		pFreenect = NULL;
-		pDevice = NULL;
-	}
-
+	KinectStopDevice();
 	KinectDepthDetectDestroyTrackbarWindow();
 }
 

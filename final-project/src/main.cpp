@@ -50,12 +50,15 @@ int main(int argc, char** argv)
 	const char *middleWindow1 = NULL;
 	const char middleWindow2[] = "Canny Results";
 	const char OutputImageWindow[] = "Hand Detection Results";
+
 	cv::Mat input;
 	cv::Mat mid1;
 	cv::Mat mid2;
 	cv::Mat mid2gray;
 	cv::Mat output;
 	cv::VideoCapture video;
+
+	const int MaxKinectImageRetryCount = 10;
 
 	const cv::String CommandLineParserKeys =
 		"{help h | |print this message}{detect d |h |detection method to use (--detect=h (HSV), --detect=e (ellipse))}{videosource v |c |video source to use (--videosource=c (webcam), --videosource=k (kinect)}{@input | |input image to use (leave blank for live video)}";
@@ -183,7 +186,28 @@ int main(int argc, char** argv)
 		}
 		else if(UseKinect)
 		{
-			KinectGetRGBandRangedDepthImages(input, mid1);
+			int RetryCount = 0;
+			bool RGBEmpty = false;
+			bool DepthEmpty = false;
+
+			// NOTE: especially at the start, the OpenKinect interface may not return one or both images
+			// We need to guard against this, as trying to run OpenCV operations on empty images can cause
+			// problems
+			do
+			{
+				KinectGetRGBandRangedDepthImages(input, mid1);
+				RGBEmpty = input.empty();
+				DepthEmpty = mid1.empty();
+
+				RetryCount++;
+			}
+			while((RGBEmpty) && (DepthEmpty) && (RetryCount < MaxKinectImageRetryCount));
+
+			if(RetryCount >= MaxKinectImageRetryCount)
+			{
+				printf("Unable to capture images from Kinect\n");
+				return -1;
+			}
 		}
 		else if(UseLiveVideo)
 		{
