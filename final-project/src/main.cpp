@@ -10,7 +10,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
+#include <string>
 #include <vector>
 
 #include "EllipseHandDetection.h"
@@ -71,11 +72,11 @@ int main(int argc, char** argv)
 	const int MaxKinectImageRetryCount = 10;
 
 	const cv::String CommandLineParserKeys =
-		"{help h | |print this message}{detect d |h |detection method to use (--detect=h (HSV), --detect=e (ellipse))}{videosource v |c |video source to use (--videosource=c (webcam), --videosource=k (kinect)}{@input | |input image to use (leave blank for live video)}";
+		"{help h | |print this message}{detect d |h |detection method to use (--detect=h (HSV), --detect=e (ellipse))}{videosource v |c |video source to use (--videosource=c (webcam), --videosource=k (kinect))}{@input | |input image to use (leave blank for live video)}";
 
 	// use the OpenCV command line parser to parse the command line arguments
 	cv::CommandLineParser parser(argc, argv, CommandLineParserKeys);
-	parser.about("ECE-588 Summer 2017 Final Project for Aaron Romain and Michael Kirkhart - version 0.12");
+	parser.about("ECE-588 Summer 2017 Final Project for Aaron Romain and Michael Kirkhart - version 0.14");
 
 	if(!parser.check())
 	{
@@ -119,7 +120,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		printf("Invalid detection method specified\n");
+		std::cout << "Invalid detection method specified" << std::endl;
 		return -1;
 	}
 
@@ -129,7 +130,7 @@ int main(int argc, char** argv)
 
 		if(!video.isOpened())
 		{
-			printf("ERROR: can not open camera\n");
+			std::cout << "ERROR: can not open camera" << std::endl;
 			return -1;
 		}
 		else
@@ -138,7 +139,7 @@ int main(int argc, char** argv)
 			int VideoWidth = (int)video.get(CV_CAP_PROP_FRAME_WIDTH);
 			int VideoHeight = (int)video.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-			printf("Input video: (%d x %d)\n", VideoWidth, VideoHeight);
+			std::cout << "Input video: " << VideoWidth << " x " << VideoHeight << std::endl;
 		}
 	}
 
@@ -184,13 +185,13 @@ int main(int argc, char** argv)
 
 			if(!RGBInput.data)
 			{
-				printf("Could not load specified image data\n");
+				std::cout << "Could not load specified image data" << std::endl;
 				return -1;
 			}
 
 			if(CV_8UC3 != RGBInput.type())
 			{
-				printf("Input image is not RGB type\n");
+				std::cout << "Input image is not RGB type" << std::endl;
 				return -1;
 			}
 		}
@@ -215,7 +216,7 @@ int main(int argc, char** argv)
 
 			if(RetryCount >= MaxKinectImageRetryCount)
 			{
-				printf("Unable to capture images from Kinect\n");
+				std::cout << "Unable to capture images from Kinect" << std::endl;
 				return -1;
 			}
 		}
@@ -226,14 +227,14 @@ int main(int argc, char** argv)
 
 			if(RGBInput.empty())
 			{
-				printf("Unable to capture video\n");
+				std::cout << "Unable to capture video" << std::endl;
 				video.release();
 				return -1;
 			}
 
 			if(CV_8UC3 != RGBInput.type())
 			{
-				printf("Input video is not RGB type\n");
+				std::cout << "Input video is not RGB type" << std::endl;
 				video.release();
 				return -1;
 			}
