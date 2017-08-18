@@ -13,11 +13,11 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/features2d/features2d.hpp"
-#include <stdlib.h>
-#include <stdio.h>
+#include <fstream>
 #include <vector>
 
 void HSVHandDetection(cv::Mat &Image);
+void HSVHandDetectionDumpParametersToFile(std::ofstream &filestream);
 void HSVHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *));
 void HSVHandDetectionDestroyTrackbarWindow(void);
 

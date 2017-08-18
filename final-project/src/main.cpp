@@ -1,18 +1,9 @@
-/*
- * DisplayImage.cpp
- *
- *  Created on: Aug 3, 2017
- *      Author: aaron
- */
-
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/features2d/features2d.hpp"
-#include <stdlib.h>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "EllipseHandDetection.h"
 #include "HSVHandDetection.h"
@@ -23,7 +14,6 @@ typedef enum
 	DETECTION_METHOD_HSV,
 	DETECTION_METHOD_ELLIPSE
 }	DetectionMethod_t;
-
 
 
 static bool TrackbarValueChanged = false;
@@ -283,21 +273,44 @@ int main(int argc, char** argv)
 
 		do
 		{
-			char KeyPress = cv::waitKey(10);
+			char KeyPress = cv::waitKey(50);
 
 			switch(KeyPress)
 			{
 				case 'C':
 				case 'c':
-					// save output image
-					// TODO: dump hand detection parameters to text file
-					cv::imwrite("input.jpg", RGBInput);
-					cv::imwrite("grayscale.jpg", GrayInput);
-					cv::imwrite("handdetect.jpg", HandDetection);
-					cv::imwrite("grayblur.jpg", GrayBlur);
-					cv::imwrite("canny.jpg", InputCanny);
-					cv::imwrite("thickcanny.jpg", CannyThickEdges);
-					cv::imwrite("output.jpg", OutputImage);
+					{
+						// save output images, along with text file of detection parameters
+						std::ofstream DetectionParameterFileStream;
+
+						DetectionParameterFileStream.open("detection_parameters.txt", std::ofstream::out);
+
+						if(DetectionParameterFileStream.is_open())
+						{
+							if(UseKinect)
+							{
+								KinectDepthDetectionDumpParametersToFile(DetectionParameterFileStream);
+							}
+							else if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
+							{
+								EllipseHandDetectionDumpParametersToFile(DetectionParameterFileStream);
+							}
+							else
+							{
+								HSVHandDetectionDumpParametersToFile(DetectionParameterFileStream);
+							}
+
+							DetectionParameterFileStream.close();
+						}
+
+						cv::imwrite("input.jpg", RGBInput);
+						cv::imwrite("grayscale.jpg", GrayInput);
+						cv::imwrite("handdetect.jpg", HandDetection);
+						cv::imwrite("grayblur.jpg", GrayBlur);
+						cv::imwrite("canny.jpg", InputCanny);
+						cv::imwrite("thickcanny.jpg", CannyThickEdges);
+						cv::imwrite("output.jpg", OutputImage);
+					}
 					break;
 
 				case 27:
@@ -309,6 +322,9 @@ int main(int argc, char** argv)
 			}
 		}
 		while(ReadFromFile && Run && (!TrackbarValueChanged));
+
+		// clear "trackbar value changed" flag always (will get set if any trackbar values change)
+		TrackbarValueChanged = false;
 	}
 
 	if(UseKinect)

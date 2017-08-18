@@ -104,6 +104,17 @@ void EllipseHandDetection(cv::Mat &Image)
 }
 
 
+void EllipseHandDetectionDumpParametersToFile(std::ofstream &filestream)
+{
+	if(filestream.is_open())
+	{
+		filestream << "Ellipse parameters:" << std::endl;
+		filestream << "Scaled Ellipse A = " << ScaledEllipseA << std::endl;
+		filestream << "Scaled Ellipse B = " << ScaledEllipseB << std::endl;
+	}
+}
+
+
 void EllipseHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *))
 {
 	cv::namedWindow(EllipseTrackbarWindowName, CV_WINDOW_AUTOSIZE);

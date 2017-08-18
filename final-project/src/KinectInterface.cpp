@@ -1,12 +1,10 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
 #include "libfreenect.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
 #include "MyFreenectDevice.h"
+#include "KinectInterface.h"
 
 
 static int DepthLowerRange = 25;
@@ -97,6 +95,17 @@ void KinectGetRGBandRangedDepthImages(cv::Mat &RGB, cv::Mat &RangedDepth)
 
 		// show objects within given range as white, everything else as black
 		cv::inRange(DepthFMat, DepthLowerRange, DepthUpperRange, RangedDepth);
+	}
+}
+
+
+void KinectDepthDetectionDumpParametersToFile(std::ofstream &filestream)
+{
+	if(filestream.is_open())
+	{
+		filestream << "Kinect depth detection parameters:" << std::endl;
+		filestream << "Depth Lower Range = " << DepthLowerRange << std::endl;
+		filestream << "Depth Upper Range = " << DepthUpperRange << std::endl;
 	}
 }
 

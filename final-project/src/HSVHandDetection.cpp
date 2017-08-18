@@ -90,6 +90,21 @@ void HSVHandDetection(cv::Mat &Image)
 }
 
 
+void HSVHandDetectionDumpParametersToFile(std::ofstream &filestream)
+{
+	if(filestream.is_open())
+	{
+		filestream << "HSV detection parameters:" << std::endl;
+		filestream << "Min Hue = " << MinHue << std::endl;
+		filestream << "Max Hue = " << MaxHue << std::endl;
+		filestream << "Min Saturation = " << MinSaturation << std::endl;
+		filestream << "Max Saturation = " << MaxSaturation << std::endl;
+		filestream << "Min Value = " << MinValue << std::endl;
+		filestream << "Max Value = " << MaxValue << std::endl;
+	}
+}
+
+
 void HSVHandDetectionCreateTrackbarWindow(void (*pCallbackFunction)(int, void *))
 {
 	cv::namedWindow(HSVTrackbarWindowName, CV_WINDOW_AUTOSIZE);
