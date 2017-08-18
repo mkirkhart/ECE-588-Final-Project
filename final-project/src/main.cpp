@@ -51,11 +51,21 @@ int main(int argc, char** argv)
 	const char middleWindow2[] = "Canny Results";
 	const char OutputImageWindow[] = "Hand Detection Results";
 
-	cv::Mat input;
-	cv::Mat mid1;
-	cv::Mat mid2;
-	cv::Mat mid2gray;
-	cv::Mat output;
+	// RGB image
+	cv::Mat RGBInput;
+	// Hand detection result image
+	cv::Mat HandDetection;
+	// gray scale of RGB image prior to Gaussian blur/Canny edge detect
+	cv::Mat GrayInput;
+	// Gaussian blurred gray scale image
+	cv::Mat GrayBlur;
+	// Canny edge detect on grayscale blurred input image
+	cv::Mat InputCanny;
+	// Edges with thick lines
+	cv::Mat CannyThickEdges;
+	// Output image
+	cv::Mat OutputImage;
+
 	cv::VideoCapture video;
 
 	const int MaxKinectImageRetryCount = 10;
@@ -170,15 +180,15 @@ int main(int argc, char** argv)
 	{
 		if(ReadFromFile)
 		{
-			input = cv::imread(InputFileName);
+			RGBInput = cv::imread(InputFileName);
 
-			if(!input.data)
+			if(!RGBInput.data)
 			{
 				printf("Could not load specified image data\n");
 				return -1;
 			}
 
-			if(CV_8UC3 != input.type())
+			if(CV_8UC3 != RGBInput.type())
 			{
 				printf("Input image is not RGB type\n");
 				return -1;
@@ -195,9 +205,9 @@ int main(int argc, char** argv)
 			// problems
 			do
 			{
-				KinectGetRGBandRangedDepthImages(input, mid1);
-				RGBEmpty = input.empty();
-				DepthEmpty = mid1.empty();
+				KinectGetRGBandRangedDepthImages(RGBInput, HandDetection);
+				RGBEmpty = RGBInput.empty();
+				DepthEmpty = HandDetection.empty();
 
 				RetryCount++;
 			}
@@ -212,16 +222,16 @@ int main(int argc, char** argv)
 		else if(UseLiveVideo)
 		{
 			// Get current image
-			video >> input;
+			video >> RGBInput;
 
-			if(input.empty())
+			if(RGBInput.empty())
 			{
 				printf("Unable to capture video\n");
 				video.release();
 				return -1;
 			}
 
-			if(CV_8UC3 != input.type())
+			if(CV_8UC3 != RGBInput.type())
 			{
 				printf("Input video is not RGB type\n");
 				video.release();
@@ -234,42 +244,41 @@ int main(int argc, char** argv)
 		{
 			// create output image using input as a starting point
 			// (cannot use cv::Mat = operator - must use cv::Mat::copyTo() function to do deep copy
-			input.copyTo(mid1);
+			RGBInput.copyTo(HandDetection);
 
 			if(DETECTION_METHOD_ELLIPSE == DetectionMethod)
 			{
-				EllipseHandDetection(mid1);
+				EllipseHandDetection(HandDetection);
 			}
 			else
 			{
-				HSVHandDetection(mid1);
+				HSVHandDetection(HandDetection);
 			}
 		}
 
 		// run Canny on mid2 image
 		  //first convert to grayscale
-		cv::cvtColor( input, mid2gray, cv::COLOR_BGR2GRAY );
+		cv::cvtColor(RGBInput, GrayInput, cv::COLOR_BGR2GRAY);
 		  //blur image
-		cv::blur( mid2gray, mid2, cv::Size(3,3) );
+		cv::blur(GrayInput, GrayBlur, cv::Size(3,3));
 		  //run canny
-		cv::Canny( mid2, mid2, 10, 80, 3 );
+		cv::Canny(GrayBlur, InputCanny, 10, 80, 3);
 
 		// and thicken the line using a box filter
-		cv::Mat mid2_2;
-		cv::boxFilter(mid2, mid2_2, -1, cv::Size(3,3), cv::Point(-1, -1), false, cv::BORDER_DEFAULT);
+		cv::boxFilter(InputCanny, CannyThickEdges, -1, cv::Size(3,3), cv::Point(-1, -1), false, cv::BORDER_DEFAULT);
 
-		//AND mid1 and mid2 into output image
-		cv::bitwise_and(mid1, mid2_2, output);
+		//AND the hand detection image with the thickened Canny edge detect image to produce the output image
+		cv::bitwise_and(HandDetection, CannyThickEdges, OutputImage);
 
 		// display input image
-		cv::imshow(InputImageWindow, input);
+		cv::imshow(InputImageWindow, RGBInput);
 
 		// display intermediary steps windows
-		cv::imshow(middleWindow1, mid1);
-		cv::imshow(middleWindow2, mid2_2);
+		cv::imshow(middleWindow1, HandDetection);
+		cv::imshow(middleWindow2, CannyThickEdges);
 
 		// display output image
-		cv::imshow(OutputImageWindow, output);
+		cv::imshow(OutputImageWindow, OutputImage);
 
 		do
 		{
@@ -280,10 +289,14 @@ int main(int argc, char** argv)
 				case 'C':
 				case 'c':
 					// save output image
-					cv::imwrite("input.jpg", input);
-					cv::imwrite("mid1.jpg", mid1);
-					cv::imwrite("mid2.jpg", mid2_2);
-					cv::imwrite("output.jpg", output);
+					// TODO: dump hand detection parameters to text file
+					cv::imwrite("input.jpg", RGBInput);
+					cv::imwrite("grayscale.jpg", GrayInput);
+					cv::imwrite("handdetect.jpg", HandDetection);
+					cv::imwrite("grayblur.jpg", GrayBlur);
+					cv::imwrite("canny.jpg", InputCanny);
+					cv::imwrite("thickcanny.jpg", CannyThickEdges);
+					cv::imwrite("output.jpg", OutputImage);
 					break;
 
 				case 27:
