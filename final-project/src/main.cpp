@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 	const char EllipseDetectionWindow[] = "Ellipse Detect Results";
 	const char KinectDepthRangeDetectionWindow[] = "Kinect Depth Range Results";
 	const char *middleWindow1 = NULL;
-	const char middleWindow2[] = "Canny Results";
+	const char middleWindow2[] = "Canny Results (Thickened Edges)";
 	const char OutputImageWindow[] = "Hand Detection Results";
 
 	// RGB image
